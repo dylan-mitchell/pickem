@@ -434,3 +434,55 @@ func main() {
 	read(db, coll)
 
 }
+
+// const shortForm = "2006-Jan-02"
+// yesterDay, _ := time.Parse(shortForm, "2019-Nov-18")
+//
+// exampleGroup := Group{
+// 	Name: "P and P",
+// 	ID:   "2",
+// 	Users: []User{
+// 		User{
+// 			Name: "Pratique",
+// 			Choices: []Choice{
+// 				Choice{
+// 					Date:      time.Now(),
+// 					Selection: "Pizza",
+// 				},
+// 				Choice{
+// 					Date:      yesterDay,
+// 					Selection: "Hotdog",
+// 				},
+// 			},
+// 		},
+// 		User{
+// 			Name: "Pagna",
+// 			Choices: []Choice{
+// 				Choice{
+// 					Date:      time.Now(),
+// 					Selection: "Burger",
+// 				},
+// 				Choice{
+// 					Date:      yesterDay,
+// 					Selection: "Corndog",
+// 				},
+// 			},
+// 		},
+// 	},
+// 	Pickems: []Pickem{
+// 		Pickem{
+// 			Name:    "Burger vs Pizza",
+// 			Option1: "Burger",
+// 			Option2: "Pizza",
+// 			Date:    time.Now(),
+// 			Winner:  "Pizza",
+// 		},
+// 		Pickem{
+// 			Name:    "Hotdog vs Corndog",
+// 			Option1: "Hotdog",
+// 			Option2: "Corndog",
+// 			Date:    time.Now(),
+// 			Winner:  "Hotdog",
+// 		},
+// 	},
+// }
