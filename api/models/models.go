@@ -2,8 +2,6 @@ package models
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"log"
@@ -16,35 +14,57 @@ import (
 )
 
 type Choice struct {
-	Date      time.Time `json: "Date"`
-	Selection string    `json: "Selection"`
-}
-
-type User struct {
-	UID     string   `json: "UID"`
-	Choices []Choice `json: "Choices"`
-	IsAdmin bool     `json: "IsAdmin"`
+	Date      time.Time `json: "date"`
+	Selection string    `json: "selection"`
+	User      string    `json: "user"`
 }
 
 type Pickem struct {
-	Name    string    `json: "Name"`
-	Option1 string    `json: "Option1"`
-	Option2 string    `json: "Option2"`
-	Date    time.Time `json: "Date"`
-	Winner  string    `json: "Winner"`
+	Name    string    `json: "name"`
+	Option1 string    `json: "option1"`
+	Option2 string    `json: "option2"`
+	Date    time.Time `json: "date"`
+	Winner  string    `json: "winner"`
+	Choices []Choice  `json: "choices"`
 }
 
 type Group struct {
-	Name    string   `json: "Name"`
-	ID      string   `json: "ID"`
-	Users   []User   `json: "Users"`
-	Pickems []Pickem `json: "Pickems"`
+	Name    string   `json: "name"`
+	ID      string   `json: "id"`
+	Users   []string `json: "users"`
+	Pickems []Pickem `json: "pickems"`
+	Admin   string   `json: "admin"`
 }
+
+// func (g Group) String() string {
+// 	var groupString string
+// 	groupString = groupString + "*****************\n"
+// 	groupString = groupString + "ID: " + g.ID + "\n"
+// 	groupString = groupString + "Name: " + g.Name + "\n"
+// 	for i, pickem := range g.Pickems {
+// 		groupString = groupString + fmt.Sprintf("Pickem%d:\n\t%s\n\t%s\n\t%s\n\t%s\n\t%s\n", i, pickem.Name, pickem.Option1, pickem.Option2, pickem.Winner, pickem.Date)
+// 	}
+// 	for i, user := range g.Users {
+// 		var adminStr string
+// 		if user.IsAdmin {
+// 			adminStr = "isAdmin"
+// 		} else {
+// 			adminStr = "isNotAdmin"
+// 		}
+// 		groupString = groupString + fmt.Sprintf("User%d:\n\t%s\n\t%s\n", i, user.UID, adminStr)
+// 		for i, choice := range user.Choices {
+// 			groupString = groupString + fmt.Sprintf("Choice%d:\n\t%s\n\t%s\n", i, choice.Selection, choice.Date)
+// 		}
+// 	}
+// 	groupString = groupString + "*****************\n"
+//
+// 	return groupString
+// }
 
 func UpsertGroup(db *mongo.Database, coll *mongo.Collection, group Group) error {
 	opts := options.Update().SetUpsert(true)
 	upsertdata := bson.M{"$set": group}
-	filter := bson.D{{"ID", group.ID}}
+	filter := bson.D{{"id", group.ID}}
 
 	result, err := coll.UpdateOne(
 		context.Background(),
@@ -97,7 +117,7 @@ func GetAllGroups(db *mongo.Database, coll *mongo.Collection) ([]Group, error) {
 func GetGroupWithID(db *mongo.Database, coll *mongo.Collection, ID string) (Group, error) {
 	cursor, err := coll.Find(
 		context.Background(),
-		bson.D{{"ID", ID}},
+		bson.D{{"id", ID}},
 	)
 
 	if err != nil {
@@ -111,16 +131,64 @@ func GetGroupWithID(db *mongo.Database, coll *mongo.Collection, ID string) (Grou
 		if err := cursor.Decode(elem); err != nil {
 			log.Fatal(err)
 		}
-		// ideally, you would do something with elem....
-		// but for now just print it to the console
-		// fmt.Println(elem)
+
 		group = *elem
 	}
 
 	return group, nil
 }
 
-// func createGroup(name string)
+func AddUserToGroupWithID(db *mongo.Database, coll *mongo.Collection, ID string, UID string) error {
+	cursor, err := coll.Find(
+		context.Background(),
+		bson.D{{"id", ID}},
+	)
+
+	if err != nil {
+		return errors.New("Error Finding collection: " + err.Error())
+	}
+
+	var group Group
+
+	for cursor.Next(context.TODO()) {
+		elem := &Group{}
+		if err := cursor.Decode(elem); err != nil {
+			return err
+		}
+
+		group = *elem
+	}
+
+	group.Users = append(group.Users, UID)
+	UpsertGroup(db, coll, group)
+	return nil
+}
+
+func GetGroupsForUID(db *mongo.Database, coll *mongo.Collection, UID string) ([]Group, error) {
+	cursor, err := coll.Find(
+		context.Background(),
+		bson.D{
+			{"users", UID},
+		},
+	)
+
+	if err != nil {
+		return nil, errors.New("Error Finding collection: " + err.Error())
+	}
+
+	var groups []Group
+
+	for cursor.Next(context.TODO()) {
+		elem := &Group{}
+		if err := cursor.Decode(elem); err != nil {
+			log.Fatal(err)
+		}
+
+		groups = append(groups, *elem)
+	}
+
+	return groups, nil
+}
 
 func ReadAll(db *mongo.Database, coll *mongo.Collection) {
 	cursor, err := coll.Find(
@@ -133,12 +201,11 @@ func ReadAll(db *mongo.Database, coll *mongo.Collection) {
 	}
 
 	for cursor.Next(context.TODO()) {
-		elem := &bson.D{}
+		elem := &Group{}
 		if err := cursor.Decode(elem); err != nil {
 			log.Fatal(err)
 		}
-		// ideally, you would do something with elem....
-		// but for now just print it to the console
+
 		fmt.Println(elem)
 	}
 
@@ -153,17 +220,6 @@ func DeleteAll(db *mongo.Database, coll *mongo.Collection) {
 	}
 
 	fmt.Println("Successfully deleted all")
-}
-
-func genID() (string, error) {
-	ID := make([]byte, 12)
-
-	_, err := rand.Read(ID)
-	if err != nil {
-		return "", err
-	}
-
-	return hex.EncodeToString(ID), nil
 }
 
 func Connect() (*mongo.Client, error) {
@@ -189,7 +245,28 @@ func Connect() (*mongo.Client, error) {
 	return client, err
 }
 
-func CreateGroup(groupName string, adminUID string) (Group, error) {
+func CheckIfIDExists(db *mongo.Database, coll *mongo.Collection, id string) bool {
+	cursor, err := coll.Find(
+		context.Background(),
+		bson.D{{"id", id}},
+	)
+
+	if err != nil {
+		fmt.Println("Error Finding collection: " + err.Error())
+	}
+
+	for cursor.Next(context.TODO()) {
+		elem := &bson.D{}
+		if err := cursor.Decode(elem); err != nil {
+			log.Fatal(err)
+		}
+		return true
+	}
+	return false
+
+}
+
+func CreateGroup(groupName string, adminUID string, id string) (Group, error) {
 	if groupName == "" {
 		return Group{}, errors.New("Empty group name")
 	}
@@ -198,36 +275,18 @@ func CreateGroup(groupName string, adminUID string) (Group, error) {
 		return Group{}, errors.New("Empty admin name")
 	}
 
-	id, err := genID()
-	if err != nil {
-		return Group{}, errors.New("Error generating id: " + err.Error())
-	}
 	group := Group{
-		Name: groupName,
-		ID:   id,
-		Users: []User{
-			User{
-				UID:     adminUID,
-				Choices: []Choice{},
-				IsAdmin: true,
-			},
-		},
+		Name:    groupName,
+		ID:      id,
+		Users:   []string{adminUID},
+		Admin:   adminUID,
 		Pickems: []Pickem{},
 	}
 
 	return group, nil
 }
 
-func CreateUser(UID string) User {
-	return User{
-		UID:     UID,
-		Choices: []Choice{},
-		IsAdmin: false,
-	}
-
-}
-
-func AddUserToGroup(group Group, user User) (Group, error) {
+func AddUserToGroup(group Group, user string) (Group, error) {
 
 	group.Users = append(group.Users, user)
 
