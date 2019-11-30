@@ -49,9 +49,9 @@ class UpdateUsernameFormBase extends Component {
                 <Input
                   onChange={this.onChange}
                   name="username"
-                  type="username"
                   placeholder="Username"
                   value={username}
+                  fullwidth
                 />
               </Control>
             </Field>
@@ -63,6 +63,7 @@ class UpdateUsernameFormBase extends Component {
               onClick={this.onSubmit}
               color="success"
               size="medium"
+              fullwidth
             >
               Update Username
             </Button>

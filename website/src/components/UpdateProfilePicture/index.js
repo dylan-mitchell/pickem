@@ -58,6 +58,7 @@ class UpdateProfilePictureFormBase extends Component {
                   type="link"
                   placeholder="Link to Image"
                   value={link}
+                  fullwidth
                 />
               </Control>
             </Field>
@@ -69,6 +70,7 @@ class UpdateProfilePictureFormBase extends Component {
               onClick={this.onSubmit}
               color="success"
               size="medium"
+              fullwidth
             >
               Update Profile Picture
             </Button>

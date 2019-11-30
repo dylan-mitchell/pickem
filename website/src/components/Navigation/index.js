@@ -16,32 +16,36 @@ const Navigation = () => (
 );
 
 class NavigationAuth extends Component {
+  state = { active: false };
+
+  handleClick = () => {
+    const { active } = this.state;
+    this.setState({ active: !active });
+  };
   render() {
     return (
       <Navbar
-        color={"primary"}
+        color={"white"}
         fixed={"top"}
-        active={false}
-        transparent={false}
+        active={this.state.active}
+        transparent={true}
       >
         <Navbar.Brand>
           <Navbar.Item>
-            <Link to={ROUTES.LANDING}>
-              <img
-                src="https://bulma.io/images/bulma-logo.png"
-                alt="Bulma: a modern CSS framework based on Flexbox"
-                width="112"
-                height="28"
-              />
+            <Link style={brandStyle} to={ROUTES.LANDING}>
+              Pickem
             </Link>
           </Navbar.Item>
-          <Navbar.Burger />
+          <Navbar.Burger
+            active={this.state.active}
+            onClick={this.handleClick}
+          />
         </Navbar.Brand>
         <Navbar.Menu>
           <Navbar.Container>
             <Navbar.Item>
               <Link style={linkStyle} to={ROUTES.HOME}>
-                Home
+                Today
               </Link>
             </Navbar.Item>
             <Navbar.Item>
@@ -61,36 +65,57 @@ class NavigationAuth extends Component {
   }
 }
 
-const NavigationNonAuth = () => (
-  <Navbar color={"primary"} fixed={"top"} active={false} transparent={false}>
-    <Navbar.Brand>
-      <Navbar.Item>
-        <Link to={ROUTES.LANDING}>
-          <img
-            src="https://bulma.io/images/bulma-logo.png"
-            alt="Bulma: a modern CSS framework based on Flexbox"
-            width="112"
-            height="28"
+class NavigationNonAuth extends Component {
+  state = { active: false };
+
+  handleClick = () => {
+    const { active } = this.state;
+    this.setState({ active: !active });
+  };
+
+  render() {
+    return (
+      <Navbar
+        color={"white"}
+        fixed={"top"}
+        active={this.state.active}
+        transparent={false}
+      >
+        <Navbar.Brand>
+          <Navbar.Item>
+            <Link style={brandStyle} to={ROUTES.LANDING}>
+              Pickem
+            </Link>
+          </Navbar.Item>
+          <Navbar.Burger
+            active={this.state.active}
+            onClick={this.handleClick}
           />
-        </Link>
-      </Navbar.Item>
-      <Navbar.Burger />
-    </Navbar.Brand>
-    <Navbar.Menu>
-      <Navbar.Container position="end">
-        <Navbar.Item>
-          <Link style={linkStyle} to={ROUTES.SIGN_IN}>
-            Sign In
-          </Link>
-        </Navbar.Item>
-      </Navbar.Container>
-    </Navbar.Menu>
-  </Navbar>
-);
+        </Navbar.Brand>
+        <Navbar.Menu>
+          <Navbar.Container position="end">
+            <Navbar.Item>
+              <Link style={linkStyle} to={ROUTES.SIGN_IN}>
+                Sign In
+              </Link>
+            </Navbar.Item>
+          </Navbar.Container>
+        </Navbar.Menu>
+      </Navbar>
+    );
+  }
+}
 
 const linkStyle = {
   textDecoration: "none",
   color: "black"
+};
+
+const brandStyle = {
+  fontFamily: "Permanent Marker",
+  textDecoration: "none",
+  color: "black",
+  fontSize: "25px"
 };
 
 export default Navigation;

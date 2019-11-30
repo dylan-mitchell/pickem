@@ -7,6 +7,7 @@ import Section from "react-bulma-components/lib/components/section";
 import Heading from "react-bulma-components/lib/components/heading";
 import Container from "react-bulma-components/lib/components/container";
 import Columns from "react-bulma-components/lib/components/columns";
+import Level from "react-bulma-components/lib/components/level";
 
 const AccountPage = () => (
   <AuthUserContext.Consumer>
@@ -15,16 +16,20 @@ const AccountPage = () => (
         <Container>
           <Columns centered>
             <Columns.Column size="half">
-              <Heading size={1} style={centerStyle}>
-                {authUser.displayName}
-              </Heading>
-              <div style={centerPic}>
-                <ProfilePicture
-                  imageURL={authUser.photoURL}
-                  username={authUser.displayName}
-                  size={128}
-                />
-              </div>
+              <Level centered>
+                <Level.Item>
+                  <Heading size={1} style={centerStyle}>
+                    {authUser.displayName}
+                  </Heading>
+                </Level.Item>
+                <Level.Item>
+                  <ProfilePicture
+                    imageURL={authUser.photoURL}
+                    username={authUser.displayName}
+                    size={128}
+                  />
+                </Level.Item>
+              </Level>
               <UpdateUsernameForm />
               <UpdateProfilePictureForm />
             </Columns.Column>
@@ -37,10 +42,6 @@ const AccountPage = () => (
 
 const centerStyle = {
   textAlign: "center"
-};
-
-const centerPic = {
-  marginLeft: "32%"
 };
 
 const condition = authUser => !!authUser;

@@ -2,10 +2,6 @@ import React from "react";
 import Image from "react-bulma-components/lib/components/image";
 
 class ProfilePicture extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   getPicture = () => {
     if (!this.props.imageURL) {
       return (
@@ -17,7 +13,7 @@ class ProfilePicture extends React.Component {
   };
 
   render() {
-    return <Image src={this.getPicture()} size={"128x128"} rounded />;
+    return <Image src={this.getPicture()} size={this.props.size} rounded />;
   }
 }
 
